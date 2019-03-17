@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api
 
+a = 'my string'
 # class my_module(models.Model):
 #     _name = 'my_module.my_module'
 
