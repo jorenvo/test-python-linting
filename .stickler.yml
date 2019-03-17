@@ -6,3 +6,6 @@ linters:
     python: 3
     ignore: "E501"
     max-complexity: 20
+
+fixers:
+  enable: true
