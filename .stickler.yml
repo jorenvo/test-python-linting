@@ -1,11 +1,7 @@
 ---
 linters:
   black:
-    fixer: true
   flake8:
     python: 3
     ignore: "E501"
     max-complexity: 20
-
-fixers:
-  enable: true
