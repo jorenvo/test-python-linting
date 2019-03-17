@@ -2,3 +2,6 @@
 linters:
   black:
     fixer: true
+  flake8:
+    python: 3
+    max-complexity: 20
