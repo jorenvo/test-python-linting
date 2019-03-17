@@ -9,6 +9,7 @@ class MyModule(http.Controller):
 
     @http.route("/my_module/my_module/objects/", auth="public")
     def list(self, **kw):
+        do_something()
         return http.request.render(
             "my_module.listing",
             {

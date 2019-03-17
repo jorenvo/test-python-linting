@@ -12,4 +12,5 @@ class my_module(models.Model):
 
     @api.depends("value")
     def _value_pc(self):
+        ue
         self.value2 = float(self.value) / 100
