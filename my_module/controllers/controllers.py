@@ -22,4 +22,7 @@ class MyModule(http.Controller):
         auth="public",
     )
     def object(self, obj, **kw):
+        if obj:
+            obj = 'some unformatted code'
+
         return http.request.render("my_module.object", {"object": obj})
