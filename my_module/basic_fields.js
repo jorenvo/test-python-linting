@@ -2959,6 +2959,10 @@ odoo.define('web.basic_fields', function(require) {
       }
     },
 
+    boing: function() {
+      ueao + ueau;
+    },
+
     /**
      * Starts the ace library on the given DOM element. This initializes the
      * ace editor option according to the edit/readonly mode and binds ace
