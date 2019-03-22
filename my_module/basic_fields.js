@@ -1,25 +1,25 @@
-odoo.define('web.basic_fields', function(require) {
-  'use strict';
+odoo.define("web.basic_fields", function(require) {
+  "use strict";
 
   /**
- * This module contains most of the basic (meaning: non relational) field
- * widgets. Field widgets are supposed to be used in views inheriting from
- * BasicView, so, they can work with the records obtained from a BasicModel.
- */
+   * This module contains most of the basic (meaning: non relational) field
+   * widgets. Field widgets are supposed to be used in views inheriting from
+   * BasicView, so, they can work with the records obtained from a BasicModel.
+   */
 
-  const AbstractField = require('web.AbstractField');
-  const core = require('web.core');
-  const crash_manager = require('web.crash_manager');
-  const datepicker = require('web.datepicker');
-  const dom = require('web.dom');
-  const Domain = require('web.Domain');
-  const DomainSelector = require('web.DomainSelector');
-  const DomainSelectorDialog = require('web.DomainSelectorDialog');
-  const framework = require('web.framework');
-  const session = require('web.session');
-  const utils = require('web.utils');
-  const view_dialogs = require('web.view_dialogs');
-  const field_utils = require('web.field_utils');
+  const AbstractField = require("web.AbstractField");
+  const core = require("web.core");
+  const crash_manager = require("web.crash_manager");
+  const datepicker = require("web.datepicker");
+  const dom = require("web.dom");
+  const Domain = require("web.Domain");
+  const DomainSelector = require("web.DomainSelector");
+  const DomainSelectorDialog = require("web.DomainSelectorDialog");
+  const framework = require("web.framework");
+  const session = require("web.session");
+  const utils = require("web.utils");
+  const view_dialogs = require("web.view_dialogs");
+  const field_utils = require("web.field_utils");
 
   const qweb = core.qweb;
   const _t = core._t;
@@ -35,11 +35,10 @@ odoo.define('web.basic_fields', function(require) {
      */
     _renderTranslateButton: function() {
       if (_t.database.multi_lang && this.field.translate && this.res_id) {
-        return $('<button>', {
-          'type': 'button',
-          'class': 'o_field_translate fa fa-globe btn btn-link',
-        })
-            .on('click', this._onTranslate.bind(this));
+        return $("<button>", {
+          type: "button",
+          class: "o_field_translate fa fa-globe btn btn-link"
+        }).on("click", this._onTranslate.bind(this));
       }
       return $();
     },
@@ -54,8 +53,11 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _onTranslate: function() {
-      this.trigger_up('translate', {fieldName: this.name, id: this.dataPointID});
-    },
+      this.trigger_up("translate", {
+        fieldName: this.name,
+        id: this.dataPointID
+      });
+    }
   };
 
   const DebouncedField = AbstractField.extend({
@@ -85,7 +87,7 @@ odoo.define('web.basic_fields', function(require) {
       // once with the widget, so that we can prevent it from triggering a
       // field_changed in commitChanges if the user didn't change anything
       this._isDirty = false;
-      if (this.mode === 'edit') {
+      if (this.mode === "edit") {
         if (this.DEBOUNCE) {
           this._doDebouncedAction = _.debounce(this._doAction, this.DEBOUNCE);
         } else {
@@ -113,7 +115,7 @@ odoo.define('web.basic_fields', function(require) {
      * @override
      */
     commitChanges: function() {
-      if (this._isDirty && this.mode === 'edit') {
+      if (this._isDirty && this.mode === "edit") {
         return this._doAction();
       }
     },
@@ -146,16 +148,16 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      * @return {*}
      */
-    _getValue: function() {},
+    _getValue: function() {}
   });
 
   const InputField = DebouncedField.extend({
     custom_events: _.extend({}, DebouncedField.prototype.custom_events, {
-      field_changed: '_onFieldChanged',
+      field_changed: "_onFieldChanged"
     }),
     events: _.extend({}, DebouncedField.prototype.events, {
-      'input': '_onInput',
-      'change': '_onChange',
+      input: "_onInput",
+      change: "_onChange"
     }),
 
     /**
@@ -166,9 +168,9 @@ odoo.define('web.basic_fields', function(require) {
      */
     init: function() {
       this._super.apply(this, arguments);
-      this.nodeOptions.isPassword = 'password' in this.attrs;
-      if (this.mode === 'edit') {
-        this.tagName = 'input';
+      this.nodeOptions.isPassword = "password" in this.attrs;
+      if (this.mode === "edit") {
+        this.tagName = "input";
       }
       // We need to know if the widget is dirty (i.e. if the user has changed
       // the value, and those changes haven't been acknowledged yet by the
@@ -205,7 +207,12 @@ odoo.define('web.basic_fields', function(require) {
       if (!event || event === this.lastChangeEvent) {
         this.isDirty = false;
       }
-      if (this.isDirty || (event && event.target === this && event.data.changes[this.name] === this.value)) {
+      if (
+        this.isDirty ||
+        (event &&
+          event.target === this &&
+          event.data.changes[this.name] === this.value)
+      ) {
         if (this.attrs.decorations) {
           // if a field is modified, then it could have triggered an onchange
           // which changed some of its decorations. Since we bypass the
@@ -241,16 +248,22 @@ odoo.define('web.basic_fields', function(require) {
      * @return {jQuery} the prepared this.$input element
      */
     _prepareInput: function($input) {
-      this.$input = $input || $('<input/>');
-      this.$input.addClass('o_input');
+      this.$input = $input || $("<input/>");
+      this.$input.addClass("o_input");
 
-      let inputAttrs = {placeholder: this.attrs.placeholder || ''};
+      let inputAttrs = { placeholder: this.attrs.placeholder || "" };
       let inputVal;
       if (this.nodeOptions.isPassword) {
-        inputAttrs = _.extend(inputAttrs, {type: 'password', autocomplete: 'new-password'});
-        inputVal = this.value || '';
+        inputAttrs = _.extend(inputAttrs, {
+          type: "password",
+          autocomplete: "new-password"
+        });
+        inputVal = this.value || "";
       } else {
-        inputAttrs = _.extend(inputAttrs, {type: 'text', autocomplete: this.attrs.autocomplete});
+        inputAttrs = _.extend(inputAttrs, {
+          type: "text",
+          autocomplete: this.attrs.autocomplete
+        });
         inputVal = this._formatValue(this.value);
       }
 
@@ -325,17 +338,23 @@ odoo.define('web.basic_fields', function(require) {
       this._super.apply(this, arguments);
 
       // the following code only makes sense in edit mode, with an input
-      if (this.mode === 'edit' && ev.data.direction !== 'cancel') {
+      if (this.mode === "edit" && ev.data.direction !== "cancel") {
         const input = this.$input[0];
-        const selecting = (input.selectionEnd !== input.selectionStart);
-        if ((ev.data.direction === 'left' && (selecting || input.selectionStart !== 0))
-                || (ev.data.direction === 'right' && (selecting || input.selectionStart !== input.value.length))) {
+        const selecting = input.selectionEnd !== input.selectionStart;
+        if (
+          (ev.data.direction === "left" &&
+            (selecting || input.selectionStart !== 0)) ||
+          (ev.data.direction === "right" &&
+            (selecting || input.selectionStart !== input.value.length))
+        ) {
           ev.stopPropagation();
         }
-        if (ev.data.direction ==='next' &&
-                this.attrs.modifiersValue &&
-                this.attrs.modifiersValue.required &&
-                this.viewType !== 'list') {
+        if (
+          ev.data.direction === "next" &&
+          this.attrs.modifiersValue &&
+          this.attrs.modifiersValue.required &&
+          this.viewType !== "list"
+        ) {
           if (!this.$input.val()) {
             this.setInvalidClass();
             ev.stopPropagation();
@@ -344,11 +363,11 @@ odoo.define('web.basic_fields', function(require) {
           }
         }
       }
-    },
+    }
   });
 
   const NumericField = InputField.extend({
-    tagName: 'span',
+    tagName: "span",
 
     // --------------------------------------------------------------------------
     // Public
@@ -377,7 +396,7 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _formatValue: function(value) {
-      if (this.mode === 'edit' && this.nodeOptions.type === 'number') {
+      if (this.mode === "edit" && this.nodeOptions.type === "number") {
         return value;
       }
       return this._super.apply(this, arguments);
@@ -395,20 +414,20 @@ odoo.define('web.basic_fields', function(require) {
      */
     _prepareInput: function($input) {
       const result = this._super.apply(this, arguments);
-      if (this.nodeOptions.type === 'number') {
-        this.$input.attr({type: 'number'});
+      if (this.nodeOptions.type === "number") {
+        this.$input.attr({ type: "number" });
       }
       if (this.nodeOptions.step) {
-        this.$input.attr({step: this.nodeOptions.step});
+        this.$input.attr({ step: this.nodeOptions.step });
       }
       return result;
-    },
+    }
   });
 
   const FieldChar = InputField.extend(TranslatableFieldMixin, {
-    className: 'o_field_char',
-    tagName: 'span',
-    supportedFieldTypes: ['char'],
+    className: "o_field_char",
+    tagName: "span",
+    supportedFieldTypes: ["char"],
 
     // --------------------------------------------------------------------------
     // Private
@@ -423,7 +442,7 @@ odoo.define('web.basic_fields', function(require) {
     _renderEdit: function() {
       const def = this._super.apply(this, arguments);
       if (this.field.size && this.field.size > 0) {
-        this.$el.attr('maxlength', this.field.size);
+        this.$el.attr("maxlength", this.field.size);
       }
       this.$el = this.$el.add(this._renderTranslateButton());
       return def;
@@ -441,13 +460,12 @@ odoo.define('web.basic_fields', function(require) {
         value = value.trim();
       }
       return this._super(value, options);
-    },
+    }
   });
-
 
   const LinkButton = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
-      'click': '_onClick',
+      click: "_onClick"
     }),
     // --------------------------------------------------------------------------
     // Private
@@ -460,12 +478,12 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       if (this.value) {
-        const className = this.attrs.icon || 'fa-globe';
+        const className = this.attrs.icon || "fa-globe";
 
-        this.$el.html('<span role=\'img\'/>');
-        this.$el.addClass('fa '+ className);
-        this.$el.attr('title', this.value);
-        this.$el.attr('aria-label', this.value);
+        this.$el.html("<span role='img'/>");
+        this.$el.addClass("fa " + className);
+        this.$el.attr("title", this.value);
+        this.$el.attr("aria-label", this.value);
       }
     },
 
@@ -481,16 +499,14 @@ odoo.define('web.basic_fields', function(require) {
      */
     _onClick: function(event) {
       event.stopPropagation();
-      window.open(this.value, '_blank');
-    },
-
+      window.open(this.value, "_blank");
+    }
   });
 
-
   const FieldDate = InputField.extend({
-    className: 'o_field_date',
-    tagName: 'span',
-    supportedFieldTypes: ['date', 'datetime'],
+    className: "o_field_date",
+    tagName: "span",
+    supportedFieldTypes: ["date", "datetime"],
 
     /**
      * @override
@@ -500,9 +516,9 @@ odoo.define('web.basic_fields', function(require) {
       // use the session timezone when formatting dates
       this.formatOptions.timezone = true;
       this.datepickerOptions = _.defaults(
-          {},
-          this.nodeOptions.datepicker || {},
-          {defaultDate: this.value}
+        {},
+        this.nodeOptions.datepicker || {},
+        { defaultDate: this.value }
       );
     },
     /**
@@ -513,16 +529,16 @@ odoo.define('web.basic_fields', function(require) {
     start: function() {
       const self = this;
       let def;
-      if (this.mode === 'edit') {
+      if (this.mode === "edit") {
         this.datewidget = this._makeDatePicker();
-        this.datewidget.on('datetime_changed', this, function() {
+        this.datewidget.on("datetime_changed", this, function() {
           const value = this._getValue();
           if ((!value && this.value) || (value && !this._isSameValue(value))) {
             this._setValue(value);
           }
         });
-        def = this.datewidget.appendTo('<div>').done(function() {
-          self.datewidget.$el.addClass(self.$el.attr('class'));
+        def = this.datewidget.appendTo("<div>").done(function() {
+          self.datewidget.$el.addClass(self.$el.attr("class"));
           self._prepareInput(self.datewidget.$input);
           self._replaceElement(self.datewidget.$el);
         });
@@ -579,7 +595,7 @@ odoo.define('web.basic_fields', function(require) {
       if (value === false) {
         return this.value === false;
       }
-      return value.isSame(this.value, 'day');
+      return value.isSame(this.value, "day");
     },
     /**
      * Instantiates a new DateWidget datepicker.
@@ -599,11 +615,11 @@ odoo.define('web.basic_fields', function(require) {
     _renderEdit: function() {
       this.datewidget.setValue(this.value);
       this.$input = this.datewidget.$input;
-    },
+    }
   });
 
   const FieldDateTime = FieldDate.extend({
-    supportedFieldTypes: ['datetime'],
+    supportedFieldTypes: ["datetime"],
 
     /**
      * @override
@@ -612,7 +628,7 @@ odoo.define('web.basic_fields', function(require) {
       this._super.apply(this, arguments);
       if (this.value) {
         const offset = this.getSession().getTZOffset(this.value);
-        const displayedValue = this.value.clone().add(offset, 'minutes');
+        const displayedValue = this.value.clone().add(offset, "minutes");
         this.datepickerOptions.defaultDate = displayedValue;
       }
     },
@@ -627,7 +643,9 @@ odoo.define('web.basic_fields', function(require) {
      */
     _getValue: function() {
       const value = this.datewidget.getValue();
-      return value && value.add(-this.getSession().getTZOffset(value), 'minutes');
+      return (
+        value && value.add(-this.getSession().getTZOffset(value), "minutes")
+      );
     },
     /**
      * @override
@@ -655,16 +673,20 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _renderEdit: function() {
-      const value = this.value && this.value.clone().add(this.getSession().getTZOffset(this.value), 'minutes');
+      const value =
+        this.value &&
+        this.value
+          .clone()
+          .add(this.getSession().getTZOffset(this.value), "minutes");
       this.datewidget.setValue(value);
       this.$input = this.datewidget.$input;
-    },
+    }
   });
 
   const FieldMonetary = InputField.extend({
-    className: 'o_field_monetary o_field_number',
-    tagName: 'span',
-    supportedFieldTypes: ['float', 'monetary'],
+    className: "o_field_monetary o_field_number",
+    tagName: "span",
+    supportedFieldTypes: ["float", "monetary"],
     resetOnAnyFieldChange: true, // Have to listen to currency changes
 
     /**
@@ -686,9 +708,9 @@ odoo.define('web.basic_fields', function(require) {
 
       this._setCurrency();
 
-      if (this.mode === 'edit') {
-        this.tagName = 'div';
-        this.className += ' o_input';
+      if (this.mode === "edit") {
+        this.tagName = "div";
+        this.className += " o_input";
 
         // do not display currency symbol in edit
         this.formatOptions.noSymbol = true;
@@ -731,8 +753,8 @@ odoo.define('web.basic_fields', function(require) {
 
       if (this.currency) {
         // Prepare and add the currency symbol
-        const $currencySymbol = $('<span>', {text: this.currency.symbol});
-        if (this.currency.position === 'after') {
+        const $currencySymbol = $("<span>", { text: this.currency.symbol });
+        if (this.currency.position === "after") {
           this.$el.append($currencySymbol);
         } else {
           this.$el.prepend($currencySymbol);
@@ -764,19 +786,24 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _setCurrency: function() {
-      const currencyField = this.nodeOptions.currency_field || this.field.currency_field || 'currency_id';
-      const currencyID = this.record.data[currencyField] && this.record.data[currencyField].res_id;
+      const currencyField =
+        this.nodeOptions.currency_field ||
+        this.field.currency_field ||
+        "currency_id";
+      const currencyID =
+        this.record.data[currencyField] &&
+        this.record.data[currencyField].res_id;
       this.currency = session.get_currency(currencyID);
       this.formatOptions.currency = this.currency; // _formatValue() uses formatOptions
-    },
+    }
   });
 
   const FieldBoolean = AbstractField.extend({
-    className: 'o_field_boolean',
+    className: "o_field_boolean",
     events: _.extend({}, AbstractField.prototype.events, {
-      change: '_onChange',
+      change: "_onChange"
     }),
-    supportedFieldTypes: ['boolean'],
+    supportedFieldTypes: ["boolean"],
 
     // --------------------------------------------------------------------------
     // Public
@@ -793,7 +820,13 @@ odoo.define('web.basic_fields', function(require) {
       // the one rendered by the widget itself. Even though the event might
       // have been fired on the non-widget version of this field, we can still
       // test the presence of its custom class.
-      if (activated && options && options.event && $(options.event.target).closest('.custom-control.custom-checkbox').length) {
+      if (
+        activated &&
+        options &&
+        options.event &&
+        $(options.event.target).closest(".custom-control.custom-checkbox")
+          .length
+      ) {
         this._setValue(!this.value); // Toggle the checkbox
       }
       return activated;
@@ -835,7 +868,7 @@ odoo.define('web.basic_fields', function(require) {
      */
     setIDForLabel: function(id) {
       this._super.apply(this, arguments);
-      this.$('.custom-control-label').attr('for', id);
+      this.$(".custom-control-label").attr("for", id);
     },
 
     // --------------------------------------------------------------------------
@@ -853,9 +886,9 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       const $checkbox = this._formatValue(this.value);
-      this.$input = $checkbox.find('input');
-      this.$input.prop('disabled', this.mode === 'readonly');
-      this.$el.addClass($checkbox.attr('class'));
+      this.$input = $checkbox.find("input");
+      this.$input.prop("disabled", this.mode === "readonly");
+      this.$el.addClass($checkbox.attr("class"));
       this.$el.empty().append($checkbox.contents());
     },
 
@@ -883,7 +916,7 @@ odoo.define('web.basic_fields', function(require) {
     _onKeydown: function(ev) {
       switch (ev.which) {
         case $.ui.keyCode.ENTER:
-          this.$input.prop('checked', !this.value);
+          this.$input.prop("checked", !this.value);
           this._setValue(!this.value);
           return;
         case $.ui.keyCode.UP:
@@ -893,12 +926,12 @@ odoo.define('web.basic_fields', function(require) {
           ev.preventDefault();
       }
       this._super.apply(this, arguments);
-    },
+    }
   });
 
   const FieldInteger = NumericField.extend({
-    className: 'o_field_integer o_field_number',
-    supportedFieldTypes: ['integer'],
+    className: "o_field_integer o_field_number",
+    supportedFieldTypes: ["integer"],
 
     // --------------------------------------------------------------------------
     // Private
@@ -919,19 +952,19 @@ odoo.define('web.basic_fields', function(require) {
      * @return {string}
      */
     _formatValue: function(value) {
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         if (!/^[0-9]+-/.test(value)) {
           throw new Error('"' + value + '" is not an integer or a virtual id');
         }
         return value;
       }
       return this._super.apply(this, arguments);
-    },
+    }
   });
 
   const FieldFloat = NumericField.extend({
-    className: 'o_field_float o_field_number',
-    supportedFieldTypes: ['float'],
+    className: "o_field_float o_field_number",
+    supportedFieldTypes: ["float"],
 
     /**
      * Float fields have an additional precision parameter that is read from
@@ -944,7 +977,7 @@ odoo.define('web.basic_fields', function(require) {
       if (this.attrs.digits) {
         this.nodeOptions.digits = JSON.parse(this.attrs.digits);
       }
-    },
+    }
   });
 
   const FieldFloatTime = FieldFloat.extend({
@@ -952,18 +985,18 @@ odoo.define('web.basic_fields', function(require) {
     // attrs must be set to 'float_time', so the formatType is automatically
     // 'float_time', but for the sake of clarity, we explicitely define a
     // FieldFloatTime widget with formatType = 'float_time'.
-    formatType: 'float_time',
+    formatType: "float_time",
 
     init: function() {
       this._super.apply(this, arguments);
-      this.formatType = 'float_time';
-    },
+      this.formatType = "float_time";
+    }
   });
 
   const FieldFloatFactor = FieldFloat.extend({
-    supportedFieldTypes: ['float'],
-    className: 'o_field_float_factor',
-    formatType: 'float_factor',
+    supportedFieldTypes: ["float"],
+    className: "o_field_float_factor",
+    formatType: "float_factor",
 
     /**
      * @constructor
@@ -976,23 +1009,23 @@ odoo.define('web.basic_fields', function(require) {
       }
       // use as format and parse options
       this.parseOptions = this.nodeOptions;
-    },
+    }
   });
 
   /**
- * The goal of this widget is to replace the input field by a button containing a
- * range of possible values (given in the options). Each click allows the user to loop
- * in the range. The purpose here is to restrict the field value to a predefined selection.
- * Also, the widget support the factor conversion as the *float_factor* widget (Range values
- * should be the result of the conversion).
- **/
+   * The goal of this widget is to replace the input field by a button containing a
+   * range of possible values (given in the options). Each click allows the user to loop
+   * in the range. The purpose here is to restrict the field value to a predefined selection.
+   * Also, the widget support the factor conversion as the *float_factor* widget (Range values
+   * should be the result of the conversion).
+   **/
   const FieldFloatToggle = AbstractField.extend({
-    supportedFieldTypes: ['float'],
-    formatType: 'float_factor',
-    className: 'o_field_float_toggle',
-    tagName: 'span',
+    supportedFieldTypes: ["float"],
+    formatType: "float_factor",
+    className: "o_field_float_toggle",
+    tagName: "span",
     events: {
-      click: '_onClick',
+      click: "_onClick"
     },
 
     /**
@@ -1001,10 +1034,10 @@ odoo.define('web.basic_fields', function(require) {
     init: function() {
       this._super.apply(this, arguments);
 
-      this.formatType = 'float_factor';
+      this.formatType = "float_factor";
 
-      if (this.mode === 'edit') {
-        this.tagName = 'button';
+      if (this.mode === "edit") {
+        this.tagName = "button";
       }
 
       // we don't inherit Float Field
@@ -1087,23 +1120,22 @@ odoo.define('web.basic_fields', function(require) {
      * @param {OdooEvent} ev
      */
     _onClick: function(ev) {
-      if (this.mode === 'edit') {
+      if (this.mode === "edit") {
         ev.stopPropagation(); // only stop propagation in edit mode
         const next_val = this._nextValue();
         this._setValue(next_val.toString()); // will be parsed in _setValue
       }
-    },
-
+    }
   });
 
   const FieldPercentage = FieldFloat.extend({
-    formatType: 'percentage',
+    formatType: "percentage"
   });
 
   const FieldText = InputField.extend(TranslatableFieldMixin, {
-    className: 'o_field_text',
-    supportedFieldTypes: ['text'],
-    tagName: 'span',
+    className: "o_field_text",
+    supportedFieldTypes: ["text"],
+    tagName: "span",
 
     /**
      * @constructor
@@ -1111,8 +1143,8 @@ odoo.define('web.basic_fields', function(require) {
     init: function() {
       this._super.apply(this, arguments);
 
-      if (this.mode === 'edit') {
-        this.tagName = 'textarea';
+      if (this.mode === "edit") {
+        this.tagName = "textarea";
       }
     },
     /**
@@ -1121,8 +1153,8 @@ odoo.define('web.basic_fields', function(require) {
      * @override
      */
     start: function() {
-      if (this.mode === 'edit') {
-        dom.autoresize(this.$el, {parent: this});
+      if (this.mode === "edit") {
+        dom.autoresize(this.$el, { parent: this });
 
         this.$el = this.$el.add(this._renderTranslateButton());
       }
@@ -1136,8 +1168,8 @@ odoo.define('web.basic_fields', function(require) {
     reset: function() {
       const self = this;
       return $.when(this._super.apply(this, arguments)).then(function() {
-        if (self.mode === 'edit') {
-          self.$input.trigger('change');
+        if (self.mode === "edit") {
+          self.$input.trigger("change");
         }
       });
     },
@@ -1156,33 +1188,33 @@ odoo.define('web.basic_fields', function(require) {
         return;
       }
       this._super.apply(this, arguments);
-    },
+    }
   });
 
   /**
- * Displays a handle to modify the sequence.
- */
+   * Displays a handle to modify the sequence.
+   */
   const HandleWidget = AbstractField.extend({
-    className: 'o_row_handle fa fa-arrows ui-sortable-handle',
-    tagName: 'span',
-    description: '',
-    supportedFieldTypes: ['integer'],
+    className: "o_row_handle fa fa-arrows ui-sortable-handle",
+    tagName: "span",
+    description: "",
+    supportedFieldTypes: ["integer"],
 
     /*
      * @override
      */
     isSet: function() {
       return true;
-    },
+    }
   });
 
   const FieldEmail = InputField.extend({
-    className: 'o_field_email',
+    className: "o_field_email",
     events: _.extend({}, InputField.prototype.events, {
-      'click': '_onClick',
+      click: "_onClick"
     }),
-    prefix: 'mailto',
-    supportedFieldTypes: ['char'],
+    prefix: "mailto",
+    supportedFieldTypes: ["char"],
 
     /**
      * In readonly, emails should be a link, not a span.
@@ -1191,7 +1223,7 @@ odoo.define('web.basic_fields', function(require) {
      */
     init: function() {
       this._super.apply(this, arguments);
-      this.tagName = this.mode === 'readonly' ? 'a' : 'input';
+      this.tagName = this.mode === "readonly" ? "a" : "input";
     },
 
     // --------------------------------------------------------------------------
@@ -1204,7 +1236,9 @@ odoo.define('web.basic_fields', function(require) {
      * @override
      */
     getFocusableElement: function() {
-      return this.mode === 'readonly' ? this.$el : this._super.apply(this, arguments);
+      return this.mode === "readonly"
+        ? this.$el
+        : this._super.apply(this, arguments);
     },
 
     // --------------------------------------------------------------------------
@@ -1218,9 +1252,10 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _renderReadonly: function() {
-      this.$el.text(this.value)
-          .addClass('o_form_uri o_text_overflow')
-          .attr('href', this.prefix + ':' + this.value);
+      this.$el
+        .text(this.value)
+        .addClass("o_form_uri o_text_overflow")
+        .attr("href", this.prefix + ":" + this.value);
     },
 
     // --------------------------------------------------------------------------
@@ -1235,12 +1270,12 @@ odoo.define('web.basic_fields', function(require) {
      */
     _onClick: function(ev) {
       ev.stopPropagation();
-    },
+    }
   });
 
   const FieldPhone = FieldEmail.extend({
-    className: 'o_field_phone',
-    prefix: 'tel',
+    className: "o_field_phone",
+    prefix: "tel",
 
     // --------------------------------------------------------------------------
     // Private
@@ -1256,16 +1291,16 @@ odoo.define('web.basic_fields', function(require) {
       // This class should technically be there in case of a very very long
       // phone number, but it breaks the o_row mechanism, which is more
       // important right now.
-      this.$el.removeClass('o_text_overflow');
-    },
+      this.$el.removeClass("o_text_overflow");
+    }
   });
 
   const UrlWidget = InputField.extend({
-    className: 'o_field_url',
+    className: "o_field_url",
     events: _.extend({}, InputField.prototype.events, {
-      'click': '_onClick',
+      click: "_onClick"
     }),
-    supportedFieldTypes: ['char'],
+    supportedFieldTypes: ["char"],
 
     /**
      * Urls are links in readonly mode.
@@ -1274,7 +1309,7 @@ odoo.define('web.basic_fields', function(require) {
      */
     init: function() {
       this._super.apply(this, arguments);
-      this.tagName = this.mode === 'readonly' ? 'a' : 'input';
+      this.tagName = this.mode === "readonly" ? "a" : "input";
     },
 
     // --------------------------------------------------------------------------
@@ -1287,7 +1322,9 @@ odoo.define('web.basic_fields', function(require) {
      * @override
      */
     getFocusableElement: function() {
-      return this.mode === 'readonly' ? this.$el : this._super.apply(this, arguments);
+      return this.mode === "readonly"
+        ? this.$el
+        : this._super.apply(this, arguments);
     },
 
     // --------------------------------------------------------------------------
@@ -1302,10 +1339,11 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _renderReadonly: function() {
-      this.$el.text(this.attrs.text || this.value)
-          .addClass('o_form_uri o_text_overflow')
-          .attr('target', '_blank')
-          .attr('href', this.value);
+      this.$el
+        .text(this.attrs.text || this.value)
+        .addClass("o_form_uri o_text_overflow")
+        .attr("target", "_blank")
+        .attr("href", this.value);
     },
 
     // --------------------------------------------------------------------------
@@ -1320,11 +1358,10 @@ odoo.define('web.basic_fields', function(require) {
      */
     _onClick: function(ev) {
       ev.stopPropagation();
-    },
+    }
   });
 
   const CopyClipboard = {
-
     /**
      * @override
      */
@@ -1342,8 +1379,12 @@ odoo.define('web.basic_fields', function(require) {
      */
     _initClipboard: function() {
       const self = this;
-      const $clipboardBtn = this.$('.o_clipboard_button');
-      $clipboardBtn.tooltip({title: _t('Copied !'), trigger: 'manual', placement: 'right'});
+      const $clipboardBtn = this.$(".o_clipboard_button");
+      $clipboardBtn.tooltip({
+        title: _t("Copied !"),
+        trigger: "manual",
+        placement: "right"
+      });
       this.clipboard = new ClipboardJS($clipboardBtn[0], {
         text: function(_) {
           return self.value.trim();
@@ -1351,21 +1392,20 @@ odoo.define('web.basic_fields', function(require) {
         // Container added because of Bootstrap modal that give the focus to another element.
         // We need to give to correct focus to ClipboardJS (see in ClipboardJS doc)
         // https://github.com/zenorocha/clipboard.js/issues/155
-        container: self.$el[0],
+        container: self.$el[0]
       });
-      this.clipboard.on('success', function() {
+      this.clipboard.on("success", function() {
         _.defer(function() {
-          $clipboardBtn.tooltip('show');
+          $clipboardBtn.tooltip("show");
           _.delay(function() {
-            $clipboardBtn.tooltip('hide');
+            $clipboardBtn.tooltip("hide");
           }, 800);
         });
       });
-    },
+    }
   };
 
   const TextCopyClipboard = FieldText.extend(CopyClipboard, {
-
     // --------------------------------------------------------------------------
     // Private
     // --------------------------------------------------------------------------
@@ -1375,14 +1415,13 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       this._super.apply(this, arguments);
-      this.$el.addClass('o_field_copy');
-      this.$el.append($(qweb.render('CopyClipboardText')));
+      this.$el.addClass("o_field_copy");
+      this.$el.append($(qweb.render("CopyClipboardText")));
       this._initClipboard();
-    },
+    }
   });
 
   const CharCopyClipboard = FieldChar.extend(CopyClipboard, {
-
     // --------------------------------------------------------------------------
     // Private
     // --------------------------------------------------------------------------
@@ -1392,19 +1431,19 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       this._super.apply(this, arguments);
-      this.$el.addClass('o_field_copy');
-      this.$el.append($(qweb.render('CopyClipboardChar')));
+      this.$el.addClass("o_field_copy");
+      this.$el.append($(qweb.render("CopyClipboardChar")));
       this._initClipboard();
-    },
+    }
   });
 
   const AbstractFieldBinary = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
-      'change .o_input_file': 'on_file_change',
-      'click .o_select_file_button': function() {
-        this.$('.o_input_file').click();
+      "change .o_input_file": "on_file_change",
+      "click .o_select_file_button": function() {
+        this.$(".o_input_file").click();
       },
-      'click .o_clear_file_button': '_onClearClick',
+      "click .o_clear_file_button": "_onClearClick"
     }),
     init: function(parent, name, record) {
       this._super.apply(this, arguments);
@@ -1413,7 +1452,7 @@ odoo.define('web.basic_fields', function(require) {
       this.max_upload_size = 25 * 1024 * 1024; // 25Mo
       if (!this.useFileAPI) {
         const self = this;
-        this.fileupload_id = _.uniqueId('o_fileupload');
+        this.fileupload_id = _.uniqueId("o_fileupload");
         $(window).on(this.fileupload_id, function() {
           const args = [].slice.call(arguments).slice(1);
           self.on_file_uploaded.apply(self, args);
@@ -1429,41 +1468,59 @@ odoo.define('web.basic_fields', function(require) {
     on_file_change: function(e) {
       const self = this;
       const file_node = e.target;
-      if ((this.useFileAPI && file_node.files.length) || (!this.useFileAPI && $(file_node).val() !== '')) {
+      if (
+        (this.useFileAPI && file_node.files.length) ||
+        (!this.useFileAPI && $(file_node).val() !== "")
+      ) {
         if (this.useFileAPI) {
           const file = file_node.files[0];
           if (file.size > this.max_upload_size) {
-            const msg = _t('The selected file exceed the maximum file size of %s.');
-            this.do_warn(_t('File upload'), _.str.sprintf(msg, utils.human_size(this.max_upload_size)));
+            const msg = _t(
+              "The selected file exceed the maximum file size of %s."
+            );
+            this.do_warn(
+              _t("File upload"),
+              _.str.sprintf(msg, utils.human_size(this.max_upload_size))
+            );
             return false;
           }
           const filereader = new FileReader();
           filereader.readAsDataURL(file);
           filereader.onloadend = function(upload) {
             let data = upload.target.result;
-            data = data.split(',')[1];
+            data = data.split(",")[1];
             self.on_file_uploaded(file.size, file.name, file.type, data);
           };
         } else {
-          this.$('form.o_form_binary_form input[name=session_id]').val(this.getSession().session_id);
-          this.$('form.o_form_binary_form').submit();
+          this.$("form.o_form_binary_form input[name=session_id]").val(
+            this.getSession().session_id
+          );
+          this.$("form.o_form_binary_form").submit();
         }
-        this.$('.o_form_binary_progress').show();
-        this.$('button').hide();
+        this.$(".o_form_binary_progress").show();
+        this.$("button").hide();
       }
     },
     on_file_uploaded: function(size, name) {
       if (size === false) {
-        this.do_warn(_t('File Upload'), _t('There was a problem while uploading your file'));
+        this.do_warn(
+          _t("File Upload"),
+          _t("There was a problem while uploading your file")
+        );
         // TODO: use crashmanager
-        console.warn('Error while uploading file : ', name);
+        console.warn("Error while uploading file : ", name);
       } else {
         this.on_file_uploaded_and_valid.apply(this, arguments);
       }
-      this.$('.o_form_binary_progress').hide();
-      this.$('button').show();
+      this.$(".o_form_binary_progress").hide();
+      this.$("button").show();
     },
-    on_file_uploaded_and_valid: function(size, name, content_type, file_base64) {
+    on_file_uploaded_and_valid: function(
+      size,
+      name,
+      content_type,
+      file_base64
+    ) {
       this.set_filename(name);
       this._setValue(file_base64);
       this._render();
@@ -1483,10 +1540,10 @@ odoo.define('web.basic_fields', function(require) {
       if (filename && filename in this.fields) {
         const changes = {};
         changes[filename] = value;
-        this.trigger_up('field_changed', {
+        this.trigger_up("field_changed", {
           dataPointID: this.dataPointID,
           changes: changes,
-          viewType: this.viewType,
+          viewType: this.viewType
         });
       }
     },
@@ -1500,7 +1557,7 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _clearFile: function() {
-      this.set_filename('');
+      this.set_filename("");
       this._setValue(false);
       this._render();
     },
@@ -1516,29 +1573,33 @@ odoo.define('web.basic_fields', function(require) {
      */
     _onClearClick: function(ev) {
       this._clearFile();
-    },
+    }
   });
 
   const FieldBinaryImage = AbstractFieldBinary.extend({
-    fieldDependencies: _.extend({}, AbstractFieldBinary.prototype.fieldDependencies, {
-      __last_update: {type: 'datetime'},
-    }),
+    fieldDependencies: _.extend(
+      {},
+      AbstractFieldBinary.prototype.fieldDependencies,
+      {
+        __last_update: { type: "datetime" }
+      }
+    ),
 
-    template: 'FieldBinaryImage',
-    placeholder: '/web/static/src/img/placeholder.png',
+    template: "FieldBinaryImage",
+    placeholder: "/web/static/src/img/placeholder.png",
     events: _.extend({}, AbstractFieldBinary.prototype.events, {
-      'click img': function() {
-        if (this.mode === 'readonly') {
-          this.trigger_up('bounce_edit');
+      "click img": function() {
+        if (this.mode === "readonly") {
+          this.trigger_up("bounce_edit");
         }
-      },
+      }
     }),
-    supportedFieldTypes: ['binary'],
+    supportedFieldTypes: ["binary"],
     file_type_magic_word: {
-      '/': 'jpg',
-      'R': 'gif',
-      'i': 'png',
-      'P': 'svg+xml',
+      "/": "jpg",
+      R: "gif",
+      i: "png",
+      P: "svg+xml"
     },
     _render: function() {
       const self = this;
@@ -1546,53 +1607,66 @@ odoo.define('web.basic_fields', function(require) {
       if (this.value) {
         if (!utils.is_bin_size(this.value)) {
           // Use magic-word technique for detecting image type
-          url = 'data:image/' + (this.file_type_magic_word[this.value[0]] || 'png') + ';base64,' + this.value;
+          url =
+            "data:image/" +
+            (this.file_type_magic_word[this.value[0]] || "png") +
+            ";base64," +
+            this.value;
         } else {
-          url = session.url('/web/image', {
+          url = session.url("/web/image", {
             model: this.model,
             id: JSON.stringify(this.res_id),
             field: this.nodeOptions.preview_image || this.name,
             // unique forces a reload of the image when the record has been updated
-            unique: field_utils.format.datetime(this.recordData.__last_update).replace(/[^0-9]/g, ''),
+            unique: field_utils.format
+              .datetime(this.recordData.__last_update)
+              .replace(/[^0-9]/g, "")
           });
         }
       }
-      const $img = $(qweb.render('FieldBinaryImage-img', {widget: this, url: url}));
+      const $img = $(
+        qweb.render("FieldBinaryImage-img", { widget: this, url: url })
+      );
       // override css size attributes (could have been defined in css files)
       // if specified on the widget
-      const width = this.nodeOptions.size ? this.nodeOptions.size[0] : this.attrs.width;
-      const height = this.nodeOptions.size ? this.nodeOptions.size[1] : this.attrs.height;
+      const width = this.nodeOptions.size
+        ? this.nodeOptions.size[0]
+        : this.attrs.width;
+      const height = this.nodeOptions.size
+        ? this.nodeOptions.size[1]
+        : this.attrs.height;
       if (width) {
-        $img.attr('width', width);
-        $img.css('max-width', width + 'px');
+        $img.attr("width", width);
+        $img.css("max-width", width + "px");
       }
       if (height) {
-        $img.attr('height', height);
-        $img.css('max-height', height + 'px');
+        $img.attr("height", height);
+        $img.css("max-height", height + "px");
       }
-      this.$('> img').remove();
+      this.$("> img").remove();
       this.$el.prepend($img);
-      $img.on('error', function() {
+      $img.on("error", function() {
         self._clearFile();
-        $img.attr('src', self.placeholder);
-        self.do_warn(_t('Image'), _t('Could not display the selected image.'));
+        $img.attr("src", self.placeholder);
+        self.do_warn(_t("Image"), _t("Could not display the selected image."));
       });
-    },
+    }
   });
 
   const FieldBinaryFile = AbstractFieldBinary.extend({
-    template: 'FieldBinaryFile',
+    template: "FieldBinaryFile",
     events: _.extend({}, AbstractFieldBinary.prototype.events, {
-      'click': function(event) {
-        if (this.mode === 'readonly' && this.value && this.recordData.id) {
+      click: function(event) {
+        if (this.mode === "readonly" && this.value && this.recordData.id) {
           this.on_save_as(event);
         }
       },
-      'click .o_input': function() { // eq[0]
-        this.$('.o_input_file').click();
-      },
+      "click .o_input": function() {
+        // eq[0]
+        this.$(".o_input_file").click();
+      }
     }),
-    supportedFieldTypes: ['binary'],
+    supportedFieldTypes: ["binary"],
     init: function() {
       this._super.apply(this, arguments);
       this.filename_value = this.recordData[this.attrs.filename];
@@ -1600,30 +1674,36 @@ odoo.define('web.basic_fields', function(require) {
     _renderReadonly: function() {
       this.do_toggle(!!this.value);
       if (this.value) {
-        this.$el.empty().append($('<span/>').addClass('fa fa-download'));
+        this.$el.empty().append($("<span/>").addClass("fa fa-download"));
         if (this.recordData.id) {
-          this.$el.css('cursor', 'pointer');
+          this.$el.css("cursor", "pointer");
         } else {
-          this.$el.css('cursor', 'not-allowed');
+          this.$el.css("cursor", "not-allowed");
         }
         if (this.filename_value) {
-          this.$el.append(' ' + this.filename_value);
+          this.$el.append(" " + this.filename_value);
         }
       }
       if (!this.res_id) {
-        this.$el.css('cursor', 'not-allowed');
+        this.$el.css("cursor", "not-allowed");
       } else {
-        this.$el.css('cursor', 'pointer');
+        this.$el.css("cursor", "pointer");
       }
     },
     _renderEdit: function() {
       if (this.value) {
-        this.$el.children().removeClass('o_hidden');
-        this.$('.o_select_file_button').first().addClass('o_hidden');
-        this.$('.o_input').eq(0).val(this.filename_value || this.value);
+        this.$el.children().removeClass("o_hidden");
+        this.$(".o_select_file_button")
+          .first()
+          .addClass("o_hidden");
+        this.$(".o_input")
+          .eq(0)
+          .val(this.filename_value || this.value);
       } else {
-        this.$el.children().addClass('o_hidden');
-        this.$('.o_select_file_button').first().removeClass('o_hidden');
+        this.$el.children().addClass("o_hidden");
+        this.$(".o_select_file_button")
+          .first()
+          .removeClass("o_hidden");
       }
     },
     set_filename: function(value) {
@@ -1633,38 +1713,41 @@ odoo.define('web.basic_fields', function(require) {
       // download, he'll get the file corresponding to the current value
       // stored in db, which isn't the one whose filename is displayed in the
       // input, so we disable the download button
-      this.$('.o_save_file_button').prop('disabled', true);
+      this.$(".o_save_file_button").prop("disabled", true);
     },
     on_save_as: function(ev) {
       if (!this.value) {
-        this.do_warn(_t('Save As...'), _t('The field is empty, there\'s nothing to save !'));
+        this.do_warn(
+          _t("Save As..."),
+          _t("The field is empty, there's nothing to save !")
+        );
         ev.stopPropagation();
       } else if (this.res_id) {
         framework.blockUI();
         const c = crash_manager;
         const filename_fieldname = this.attrs.filename;
         this.getSession().get_file({
-          'url': '/web/content',
-          'data': {
-            'model': this.model,
-            'id': this.res_id,
-            'field': this.name,
-            'filename_field': filename_fieldname,
-            'filename': this.recordData[filename_fieldname] || null,
-            'download': true,
-            'data': utils.is_bin_size(this.value) ? null : this.value,
+          url: "/web/content",
+          data: {
+            model: this.model,
+            id: this.res_id,
+            field: this.name,
+            filename_field: filename_fieldname,
+            filename: this.recordData[filename_fieldname] || null,
+            download: true,
+            data: utils.is_bin_size(this.value) ? null : this.value
           },
-          'complete': framework.unblockUI,
-          'error': c.rpc_error.bind(c),
+          complete: framework.unblockUI,
+          error: c.rpc_error.bind(c)
         });
         ev.stopPropagation();
       }
-    },
+    }
   });
 
   const FieldPdfViewer = FieldBinaryFile.extend({
-    supportedFieldTypes: ['binary'],
-    template: 'FieldPdfViewer',
+    supportedFieldTypes: ["binary"],
+    template: "FieldPdfViewer",
     /**
      * @override
      */
@@ -1682,7 +1765,10 @@ odoo.define('web.basic_fields', function(require) {
      * @param {DOMElement} iframe
      */
     _disableButtons: function(iframe) {
-      $(iframe).contents().find('button#openFile').hide();
+      $(iframe)
+        .contents()
+        .find("button#openFile")
+        .hide();
     },
     /**
      * @private
@@ -1690,19 +1776,19 @@ odoo.define('web.basic_fields', function(require) {
      * @return {string} the pdf viewer URI
      */
     _getURI: function(fileURI) {
-      const page = this.recordData[this.name + '_page'] || 1;
+      const page = this.recordData[this.name + "_page"] || 1;
       if (!fileURI) {
         const queryObj = {
           model: this.model,
           field: this.name,
-          id: this.res_id,
+          id: this.res_id
         };
         const queryString = $.param(queryObj);
-        fileURI = '/web/image?' + queryString;
+        fileURI = "/web/image?" + queryString;
       }
       fileURI = encodeURIComponent(fileURI);
-      const viewerURL = '/web/static/lib/pdfjs/web/viewer.html?file=';
-      return viewerURL + fileURI + '#page=' + page;
+      const viewerURL = "/web/static/lib/pdfjs/web/viewer.html?file=";
+      return viewerURL + fileURI + "#page=" + page;
     },
     /**
      * @private
@@ -1710,27 +1796,29 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       const self = this;
-      const $pdfViewer = this.$('.o_form_pdf_controls').children().add(this.$('.o_pdfview_iframe'));
-      const $selectUpload = this.$('.o_select_file_button').first();
-      const $iFrame = this.$('.o_pdfview_iframe');
+      const $pdfViewer = this.$(".o_form_pdf_controls")
+        .children()
+        .add(this.$(".o_pdfview_iframe"));
+      const $selectUpload = this.$(".o_select_file_button").first();
+      const $iFrame = this.$(".o_pdfview_iframe");
 
-      $iFrame.on('load', function() {
+      $iFrame.on("load", function() {
         self.PDFViewerApplication = this.contentWindow.window.PDFViewerApplication;
         self._disableButtons(this);
       });
-      if (this.mode === 'readonly' && this.value) {
-        $iFrame.attr('src', this._getURI());
+      if (this.mode === "readonly" && this.value) {
+        $iFrame.attr("src", this._getURI());
       } else {
         if (this.value) {
           const binSize = utils.is_bin_size(this.value);
-          $pdfViewer.removeClass('o_hidden');
-          $selectUpload.addClass('o_hidden');
+          $pdfViewer.removeClass("o_hidden");
+          $selectUpload.addClass("o_hidden");
           if (binSize) {
-            $iFrame.attr('src', this._getURI());
+            $iFrame.attr("src", this._getURI());
           }
         } else {
-          $pdfViewer.addClass('o_hidden');
-          $selectUpload.removeClass('o_hidden');
+          $pdfViewer.addClass("o_hidden");
+          $selectUpload.removeClass("o_hidden");
         }
       }
     },
@@ -1755,7 +1843,7 @@ odoo.define('web.basic_fields', function(require) {
       if (this.PDFViewerApplication) {
         this.PDFViewerApplication.open(fileURI, 0);
       } else {
-        this.$('.o_pdfview_iframe').attr('src', this._getURI(fileURI));
+        this.$(".o_pdfview_iframe").attr("src", this._getURI(fileURI));
       }
     },
     /**
@@ -1767,20 +1855,19 @@ odoo.define('web.basic_fields', function(require) {
      */
     on_save_as: function(ev) {
       ev.stopPropagation();
-    },
-
+    }
   });
 
   const PriorityWidget = AbstractField.extend({
     // the current implementation of this widget makes it
     // only usable for fields of type selection
-    className: 'o_priority',
+    className: "o_priority",
     events: {
-      'mouseover > a': '_onMouseOver',
-      'mouseout > a': '_onMouseOut',
-      'click > a': '_onClick',
+      "mouseover > a": "_onMouseOver",
+      "mouseout > a": "_onMouseOut",
+      "click > a": "_onClick"
     },
-    supportedFieldTypes: ['selection'],
+    supportedFieldTypes: ["selection"],
 
     // --------------------------------------------------------------------------
     // Public
@@ -1808,13 +1895,22 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       const self = this;
-      const index_value = this.value ? _.findIndex(this.field.selection, function(v) {
-        return v[0] === self.value;
-      }) : 0;
+      const index_value = this.value
+        ? _.findIndex(this.field.selection, function(v) {
+            return v[0] === self.value;
+          })
+        : 0;
       this.$el.empty();
       this.empty_value = this.field.selection[0][0];
       _.each(this.field.selection.slice(1), function(choice, index) {
-        self.$el.append(self._renderStar('<a href="#">', index_value >= index+1, index+1, choice[1]));
+        self.$el.append(
+          self._renderStar(
+            '<a href="#">',
+            index_value >= index + 1,
+            index + 1,
+            choice[1]
+          )
+        );
       });
     },
 
@@ -1829,12 +1925,12 @@ odoo.define('web.basic_fields', function(require) {
      */
     _renderStar: function(tag, isFull, index, tip) {
       return $(tag)
-          .attr('title', tip)
-          .attr('aria-label', tip)
-          .attr('data-index', index)
-          .addClass('o_priority_star fa')
-          .toggleClass('fa-star', isFull)
-          .toggleClass('fa-star-o', !isFull);
+        .attr("title", tip)
+        .attr("aria-label", tip)
+        .attr("data-index", index)
+        .addClass("o_priority_star fa")
+        .toggleClass("fa-star", isFull)
+        .toggleClass("fa-star-o", !isFull);
     },
 
     // --------------------------------------------------------------------------
@@ -1850,7 +1946,7 @@ odoo.define('web.basic_fields', function(require) {
     _onClick: function(event) {
       event.preventDefault();
       event.stopPropagation();
-      const index = $(event.currentTarget).data('index');
+      const index = $(event.currentTarget).data("index");
       let newValue = this.field.selection[index][0];
       if (newValue === this.value) {
         newValue = this.empty_value;
@@ -1879,13 +1975,18 @@ odoo.define('web.basic_fields', function(require) {
      */
     _onMouseOver: function(event) {
       clearTimeout(this.hoverTimer);
-      this.$('.o_priority_star').removeClass('fa-star-o').addClass('fa-star');
-      $(event.currentTarget).nextAll().removeClass('fa-star').addClass('fa-star-o');
-    },
+      this.$(".o_priority_star")
+        .removeClass("fa-star-o")
+        .addClass("fa-star");
+      $(event.currentTarget)
+        .nextAll()
+        .removeClass("fa-star")
+        .addClass("fa-star-o");
+    }
   });
 
   const AttachmentImage = AbstractField.extend({
-    className: 'o_attachment_image',
+    className: "o_attachment_image",
 
     // --------------------------------------------------------------------------
     // Private
@@ -1898,21 +1999,23 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       if (this.value) {
-        this.$el.empty().append($('<img>/', {
-          src: '/web/image/' + this.value.data.id + '?unique=1',
-          title: this.value.data.display_name,
-          alt: _t('Image'),
-        }));
+        this.$el.empty().append(
+          $("<img>/", {
+            src: "/web/image/" + this.value.data.id + "?unique=1",
+            title: this.value.data.display_name,
+            alt: _t("Image")
+          })
+        );
       }
-    },
+    }
   });
 
   const StateSelectionWidget = AbstractField.extend({
-    template: 'FormSelection',
+    template: "FormSelection",
     events: {
-      'click .dropdown-item': '_setSelection',
+      "click .dropdown-item": "_setSelection"
     },
-    supportedFieldTypes: ['selection'],
+    supportedFieldTypes: ["selection"],
 
     // --------------------------------------------------------------------------
     // Private
@@ -1926,26 +2029,33 @@ odoo.define('web.basic_fields', function(require) {
     _prepareDropdownValues: function() {
       const self = this;
       const _data = [];
-      const current_stage_id = self.recordData.stage_id && self.recordData.stage_id[0];
+      const current_stage_id =
+        self.recordData.stage_id && self.recordData.stage_id[0];
       const stage_data = {
         id: current_stage_id,
         legend_normal: this.recordData.legend_normal || undefined,
         legend_blocked: this.recordData.legend_blocked || undefined,
-        legend_done: this.recordData.legend_done || undefined,
+        legend_done: this.recordData.legend_done || undefined
       };
       _.map(this.field.selection || [], function(selection_item) {
         const value = {
-          'name': selection_item[0],
-          'tooltip': selection_item[1],
+          name: selection_item[0],
+          tooltip: selection_item[1]
         };
-        if (selection_item[0] === 'normal') {
-          value.state_name = stage_data.legend_normal ? stage_data.legend_normal : selection_item[1];
-        } else if (selection_item[0] === 'done') {
-          value.state_class = 'o_status_green';
-          value.state_name = stage_data.legend_done ? stage_data.legend_done : selection_item[1];
+        if (selection_item[0] === "normal") {
+          value.state_name = stage_data.legend_normal
+            ? stage_data.legend_normal
+            : selection_item[1];
+        } else if (selection_item[0] === "done") {
+          value.state_class = "o_status_green";
+          value.state_name = stage_data.legend_done
+            ? stage_data.legend_done
+            : selection_item[1];
         } else {
-          value.state_class = 'o_status_red';
-          value.state_name = stage_data.legend_blocked ? stage_data.legend_blocked : selection_item[1];
+          value.state_class = "o_status_red";
+          value.state_name = stage_data.legend_blocked
+            ? stage_data.legend_blocked
+            : selection_item[1];
         }
         _data.push(value);
       });
@@ -1963,19 +2073,23 @@ odoo.define('web.basic_fields', function(require) {
       const states = this._prepareDropdownValues();
       // Adapt "FormSelection"
       // Like priority, default on the first possible value if no value is given.
-      const currentState = _.findWhere(states, {name: self.value}) || states[0];
-      this.$('.o_status')
-          .removeClass('o_status_red o_status_green')
-          .addClass(currentState.state_class)
-          .prop('special_click', true)
-          .parent().attr('title', currentState.state_name)
-          .attr('aria-label', currentState.state_name);
+      const currentState =
+        _.findWhere(states, { name: self.value }) || states[0];
+      this.$(".o_status")
+        .removeClass("o_status_red o_status_green")
+        .addClass(currentState.state_class)
+        .prop("special_click", true)
+        .parent()
+        .attr("title", currentState.state_name)
+        .attr("aria-label", currentState.state_name);
 
       // Render "FormSelection.Items" and move it into "FormSelection"
-      const $items = $(qweb.render('FormSelection.items', {
-        states: _.without(states, currentState),
-      }));
-      const $dropdown = this.$('.dropdown-menu');
+      const $items = $(
+        qweb.render("FormSelection.items", {
+          states: _.without(states, currentState)
+        })
+      );
+      const $dropdown = this.$(".dropdown-menu");
       $dropdown.children().remove(); // remove old items
       $items.appendTo($dropdown);
     },
@@ -1993,20 +2107,20 @@ odoo.define('web.basic_fields', function(require) {
     _setSelection: function(ev) {
       ev.preventDefault();
       const $item = $(ev.currentTarget);
-      const value = String($item.data('value'));
+      const value = String($item.data("value"));
       this._setValue(value);
-      if (this.mode === 'edit') {
+      if (this.mode === "edit") {
         this._render();
       }
-    },
+    }
   });
 
   const FavoriteWidget = AbstractField.extend({
-    className: 'o_favorite',
+    className: "o_favorite",
     events: {
-      'click': '_setFavorite',
+      click: "_setFavorite"
     },
-    supportedFieldTypes: ['boolean'],
+    supportedFieldTypes: ["boolean"],
 
     // --------------------------------------------------------------------------
     // Public
@@ -2032,9 +2146,22 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _render: function() {
-      const tip = this.value ? _t('Remove from Favorites') : _t('Add to Favorites');
-      const template = this.attrs.nolabel ? '<a href="#"><i class="fa %s" title="%s" aria-label="%s" role="img"></i></a>' : '<a href="#"><i class="fa %s" role="img" aria-label="%s"></i> %s</a>';
-      this.$el.empty().append(_.str.sprintf(template, this.value ? 'fa-star' : 'fa-star-o', tip, tip));
+      const tip = this.value
+        ? _t("Remove from Favorites")
+        : _t("Add to Favorites");
+      const template = this.attrs.nolabel
+        ? '<a href="#"><i class="fa %s" title="%s" aria-label="%s" role="img"></i></a>'
+        : '<a href="#"><i class="fa %s" role="img" aria-label="%s"></i> %s</a>';
+      this.$el
+        .empty()
+        .append(
+          _.str.sprintf(
+            template,
+            this.value ? "fa-star" : "fa-star-o",
+            tip,
+            tip
+          )
+        );
     },
 
     // --------------------------------------------------------------------------
@@ -2051,11 +2178,11 @@ odoo.define('web.basic_fields', function(require) {
       event.preventDefault();
       event.stopPropagation();
       this._setValue(!this.value);
-    },
+    }
   });
 
   const LabelSelection = AbstractField.extend({
-    supportedFieldTypes: ['selection'],
+    supportedFieldTypes: ["selection"],
 
     // --------------------------------------------------------------------------
     // Private
@@ -2070,15 +2197,17 @@ odoo.define('web.basic_fields', function(require) {
      * @override
      */
     _render: function() {
-      this.classes = this.nodeOptions && this.nodeOptions.classes || {};
-      const labelClass = this.classes[this.value] || 'primary';
-      this.$el.addClass('badge badge-' + labelClass).text(this._formatValue(this.value));
-    },
+      this.classes = (this.nodeOptions && this.nodeOptions.classes) || {};
+      const labelClass = this.classes[this.value] || "primary";
+      this.$el
+        .addClass("badge badge-" + labelClass)
+        .text(this._formatValue(this.value));
+    }
   });
 
   const FieldBooleanButton = AbstractField.extend({
-    className: 'o_stat_info',
-    supportedFieldTypes: ['boolean'],
+    className: "o_stat_info",
+    supportedFieldTypes: ["boolean"],
 
     // --------------------------------------------------------------------------
     // Public
@@ -2106,42 +2235,49 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       this.$el.empty();
-      let text; let hover;
+      let text;
+      let hover;
       switch (this.nodeOptions.terminology) {
-        case 'active':
-          text = this.value ? _t('Active') : _t('Inactive');
-          hover = this.value ? _t('Deactivate') : _t('Activate');
+        case "active":
+          text = this.value ? _t("Active") : _t("Inactive");
+          hover = this.value ? _t("Deactivate") : _t("Activate");
           break;
-        case 'archive':
-          text = this.value ? _t('Active') : _t('Archived');
-          hover = this.value ? _t('Archive') : _t('Restore');
+        case "archive":
+          text = this.value ? _t("Active") : _t("Archived");
+          hover = this.value ? _t("Archive") : _t("Restore");
           break;
-        case 'close':
-          text = this.value ? _t('Active') : _t('Closed');
-          hover = this.value ? _t('Close') : _t('Open');
+        case "close":
+          text = this.value ? _t("Active") : _t("Closed");
+          hover = this.value ? _t("Close") : _t("Open");
           break;
         default:
           var opt_terms = this.nodeOptions.terminology || {};
-          if (typeof opt_terms === 'string') {
+          if (typeof opt_terms === "string") {
             opt_terms = {}; // unsupported terminology
           }
-          text = this.value ? _t(opt_terms.string_true) || _t('On')
-                                  : _t(opt_terms.string_false) || _t('Off');
-          hover = this.value ? _t(opt_terms.hover_true) || _t('Switch Off')
-                                   : _t(opt_terms.hover_false) || _t('Switch On');
+          text = this.value
+            ? _t(opt_terms.string_true) || _t("On")
+            : _t(opt_terms.string_false) || _t("Off");
+          hover = this.value
+            ? _t(opt_terms.hover_true) || _t("Switch Off")
+            : _t(opt_terms.hover_false) || _t("Switch On");
       }
-      const val_color = this.value ? 'text-success' : 'text-danger';
-      const hover_color = this.value ? 'text-danger' : 'text-success';
-      const $val = $('<span>').addClass('o_stat_text o_not_hover ' + val_color).text(text);
-      const $hover = $('<span>').addClass('o_stat_text o_hover ' + hover_color).text(hover);
+      const val_color = this.value ? "text-success" : "text-danger";
+      const hover_color = this.value ? "text-danger" : "text-success";
+      const $val = $("<span>")
+        .addClass("o_stat_text o_not_hover " + val_color)
+        .text(text);
+      const $hover = $("<span>")
+        .addClass("o_stat_text o_hover " + hover_color)
+        .text(hover);
       this.$el.append($val).append($hover);
-    },
+    }
   });
 
   const BooleanToggle = FieldBoolean.extend({
-    className: FieldBoolean.prototype.className + ' o_boolean_toggle',
+    className: FieldBoolean.prototype.className + " o_boolean_toggle",
     events: {
-      'click': '_onClick',
+      click: "_onClick"
     },
 
     // --------------------------------------------------------------------------
@@ -2157,12 +2293,12 @@ odoo.define('web.basic_fields', function(require) {
     _onClick: function(event) {
       event.stopPropagation();
       this._setValue(!this.value);
-      this.$el.closest('.o_data_row').toggleClass('text-muted', this.value);
-    },
+      this.$el.closest(".o_data_row").toggleClass("text-muted", this.value);
+    }
   });
 
   const StatInfo = AbstractField.extend({
-    supportedFieldTypes: ['integer', 'float'],
+    supportedFieldTypes: ["integer", "float"],
 
     // --------------------------------------------------------------------------
     // Public
@@ -2191,23 +2327,26 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       const options = {
-        value: this._formatValue(this.value || 0),
+        value: this._formatValue(this.value || 0)
       };
-      if (! this.attrs.nolabel) {
-        if (this.nodeOptions.label_field && this.recordData[this.nodeOptions.label_field]) {
+      if (!this.attrs.nolabel) {
+        if (
+          this.nodeOptions.label_field &&
+          this.recordData[this.nodeOptions.label_field]
+        ) {
           options.text = this.recordData[this.nodeOptions.label_field];
         } else {
           options.text = this.string;
         }
       }
-      this.$el.html(qweb.render('StatInfo', options));
-      this.$el.addClass('o_stat_info');
-    },
+      this.$el.html(qweb.render("StatInfo", options));
+      this.$el.addClass("o_stat_info");
+    }
   });
 
   const FieldPercentPie = AbstractField.extend({
-    template: 'FieldPercentPie',
-    supportedFieldTypes: ['integer', 'float'],
+    template: "FieldPercentPie",
+    supportedFieldTypes: ["integer", "float"],
 
     /**
      * Register some useful references for later use throughout the widget.
@@ -2215,9 +2354,9 @@ odoo.define('web.basic_fields', function(require) {
      * @override
      */
     start: function() {
-      this.$leftMask = this.$('.o_mask').first();
-      this.$rightMask = this.$('.o_mask').last();
-      this.$pieValue = this.$('.o_pie_value');
+      this.$leftMask = this.$(".o_mask").first();
+      this.$rightMask = this.$(".o_mask").last();
+      this.$pieValue = this.$(".o_pie_value");
       return this._super();
     },
 
@@ -2247,41 +2386,51 @@ odoo.define('web.basic_fields', function(require) {
      */
     _render: function() {
       const value = this.value || 0;
-      const degValue = 360*value/100;
+      const degValue = (360 * value) / 100;
 
-      this.$rightMask.toggleClass('o_full', degValue >= 180);
+      this.$rightMask.toggleClass("o_full", degValue >= 180);
 
-      const leftDeg = 'rotate(' + ((degValue < 180)? 180 : degValue) + 'deg)';
-      const rightDeg = 'rotate(' + ((degValue < 180)? degValue : 0) + 'deg)';
-      this.$leftMask.css({transform: leftDeg, msTransform: leftDeg, mozTransform: leftDeg, webkitTransform: leftDeg});
-      this.$rightMask.css({transform: rightDeg, msTransform: rightDeg, mozTransform: rightDeg, webkitTransform: rightDeg});
+      const leftDeg = "rotate(" + (degValue < 180 ? 180 : degValue) + "deg)";
+      const rightDeg = "rotate(" + (degValue < 180 ? degValue : 0) + "deg)";
+      this.$leftMask.css({
+        transform: leftDeg,
+        msTransform: leftDeg,
+        mozTransform: leftDeg,
+        webkitTransform: leftDeg
+      });
+      this.$rightMask.css({
+        transform: rightDeg,
+        msTransform: rightDeg,
+        mozTransform: rightDeg,
+        webkitTransform: rightDeg
+      });
 
-      this.$pieValue.text(Math.round(value) + '%');
-    },
+      this.$pieValue.text(Math.round(value) + "%");
+    }
   });
 
   /**
- * Node options:
- *
- * - title: title of the bar, displayed on top of the bar options
- * - editable: boolean if value is editable
- * - current_value: get the current_value from the field that must be present in the view
- * - max_value: get the max_value from the field that must be present in the view
- * - edit_max_value: boolean if the max_value is editable
- * - title: title of the bar, displayed on top of the bar --> not translated,  use parameter "title" instead
- */
+   * Node options:
+   *
+   * - title: title of the bar, displayed on top of the bar options
+   * - editable: boolean if value is editable
+   * - current_value: get the current_value from the field that must be present in the view
+   * - max_value: get the max_value from the field that must be present in the view
+   * - edit_max_value: boolean if the max_value is editable
+   * - title: title of the bar, displayed on top of the bar --> not translated,  use parameter "title" instead
+   */
   const FieldProgressBar = AbstractField.extend({
-    template: 'ProgressBar',
+    template: "ProgressBar",
     events: {
-      'change input': 'on_change_input',
-      'input input': 'on_change_input',
-      'keyup input': function(e) {
+      "change input": "on_change_input",
+      "input input": "on_change_input",
+      "keyup input": function(e) {
         if (e.which === $.ui.keyCode.ENTER) {
           this.on_change_input(e);
         }
-      },
+      }
     },
-    supportedFieldTypes: ['integer', 'float'],
+    supportedFieldTypes: ["integer", "float"],
     init: function() {
       this._super.apply(this, arguments);
 
@@ -2292,7 +2441,7 @@ odoo.define('web.basic_fields', function(require) {
       this.max_value = this.recordData[this.nodeOptions.max_value] || 100;
       this.readonly = this.nodeOptions.readonly || !this.nodeOptions.editable;
       this.edit_max_value = this.nodeOptions.edit_max_value || false;
-      this.title = _t(this.attrs.title || this.nodeOptions.title) || '';
+      this.title = _t(this.attrs.title || this.nodeOptions.title) || "";
       this.edit_on_click = !this.nodeOptions.edit_max_value || false;
 
       this.write_mode = false;
@@ -2303,18 +2452,24 @@ odoo.define('web.basic_fields', function(require) {
 
       if (!this.readonly) {
         if (this.edit_on_click) {
-          this.$el.on('click', '.o_progress', function(e) {
+          this.$el.on("click", ".o_progress", function(e) {
             const $target = $(e.currentTarget);
-            self.value = Math.floor((e.pageX - $target.offset().left) / $target.outerWidth() * self.max_value);
+            self.value = Math.floor(
+              ((e.pageX - $target.offset().left) / $target.outerWidth()) *
+                self.max_value
+            );
             self._render_value();
             self.on_update(self.value);
           });
         } else {
-          this.$el.on('click', function() {
+          this.$el.on("click", function() {
             if (!self.write_mode) {
-              const $input = $('<input>', {type: 'text', class: 'o_progressbar_value o_input'});
-              $input.on('blur', _.bind(self.on_change_input, self));
-              self.$('.o_progressbar_value').replaceWith($input);
+              const $input = $("<input>", {
+                type: "text",
+                class: "o_progressbar_value o_input"
+              });
+              $input.on("blur", _.bind(self.on_change_input, self));
+              self.$(".o_progressbar_value").replaceWith($input);
               self.write_mode = true;
               self._render_value();
             }
@@ -2334,9 +2489,9 @@ odoo.define('web.basic_fields', function(require) {
           }
           const changes = {};
           changes[this.nodeOptions.max_value] = this.max_value;
-          this.trigger_up('field_changed', {
+          this.trigger_up("field_changed", {
             dataPointID: this.dataPointID,
-            changes: changes,
+            changes: changes
           });
         } else {
           this._setValue(value);
@@ -2345,13 +2500,16 @@ odoo.define('web.basic_fields', function(require) {
     },
     on_change_input: function(e) {
       const $input = $(e.target);
-      if (e.type === 'change' && !$input.is(':focus')) {
+      if (e.type === "change" && !$input.is(":focus")) {
         return;
       }
       if (isNaN($input.val())) {
-        this.do_warn(_t('Wrong value entered!'), _t('Only Integer Value should be valid.'));
+        this.do_warn(
+          _t("Wrong value entered!"),
+          _t("Only Integer Value should be valid.")
+        );
       } else {
-        if (e.type === 'input') {
+        if (e.type === "input") {
           this._render_value($input.val());
           if (parseFloat($input.val()) === 0) {
             $input.select();
@@ -2362,8 +2520,8 @@ odoo.define('web.basic_fields', function(require) {
           } else {
             this.value = $(e.target).val() || 0;
           }
-          const $div = $('<div>', {class: 'o_progressbar_value'});
-          this.$('.o_progressbar_value').replaceWith($div);
+          const $div = $("<div>", { class: "o_progressbar_value" });
+          this.$(".o_progressbar_value").replaceWith($div);
           this.write_mode = false;
 
           this._render_value();
@@ -2386,26 +2544,33 @@ odoo.define('web.basic_fields', function(require) {
 
       let widthComplete;
       if (value <= max_value) {
-        widthComplete = value/max_value * 100;
+        widthComplete = (value / max_value) * 100;
       } else {
         widthComplete = 100;
       }
 
-      this.$('.o_progress').toggleClass('o_progress_overflow', value > max_value)
-          .attr('aria-valuemin', '0')
-          .attr('aria-valuemax', max_value)
-          .attr('aria-valuenow', value);
-      this.$('.o_progressbar_complete').css('width', widthComplete + '%');
+      this.$(".o_progress")
+        .toggleClass("o_progress_overflow", value > max_value)
+        .attr("aria-valuemin", "0")
+        .attr("aria-valuemax", max_value)
+        .attr("aria-valuenow", value);
+      this.$(".o_progressbar_complete").css("width", widthComplete + "%");
 
       if (!this.write_mode) {
         if (max_value !== 100) {
-          this.$('.o_progressbar_value').text(utils.human_number(value) + ' / ' + utils.human_number(max_value));
+          this.$(".o_progressbar_value").text(
+            utils.human_number(value) + " / " + utils.human_number(max_value)
+          );
         } else {
-          this.$('.o_progressbar_value').text(utils.human_number(value) + '%');
+          this.$(".o_progressbar_value").text(utils.human_number(value) + "%");
         }
       } else if (isNaN(v)) {
-        this.$('.o_progressbar_value').val(this.edit_max_value ? max_value : value);
-        this.$('.o_progressbar_value').focus().select();
+        this.$(".o_progressbar_value").val(
+          this.edit_max_value ? max_value : value
+        );
+        this.$(".o_progressbar_value")
+          .focus()
+          .select();
       }
     },
     /**
@@ -2418,23 +2583,24 @@ odoo.define('web.basic_fields', function(require) {
     _reset: function() {
       this._super.apply(this, arguments);
       const new_max_value = this.recordData[this.nodeOptions.max_value];
-      this.max_value = new_max_value !== undefined ? new_max_value : this.max_value;
+      this.max_value =
+        new_max_value !== undefined ? new_max_value : this.max_value;
     },
     isSet: function() {
       return true;
-    },
+    }
   });
 
   /**
- * This widget is intended to be used on boolean fields. It toggles a button
- * switching between a green bullet / gray bullet.
-*/
+   * This widget is intended to be used on boolean fields. It toggles a button
+   * switching between a green bullet / gray bullet.
+   */
   const FieldToggleBoolean = AbstractField.extend({
-    template: 'toggle_button',
+    template: "toggle_button",
     events: {
-      'click': '_onToggleButton',
+      click: "_onToggleButton"
     },
-    supportedFieldTypes: ['boolean'],
+    supportedFieldTypes: ["boolean"],
 
     // --------------------------------------------------------------------------
     // Public
@@ -2458,12 +2624,14 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _render: function() {
-      this.$('i')
-          .toggleClass('o_toggle_button_success', !!this.value)
-          .toggleClass('text-muted', !this.value);
-      const title = this.value ? this.attrs.options.active : this.attrs.options.inactive;
-      this.$el.attr('title', title);
-      this.$el.attr('aria-pressed', this.value);
+      this.$("i")
+        .toggleClass("o_toggle_button_success", !!this.value)
+        .toggleClass("text-muted", !this.value);
+      const title = this.value
+        ? this.attrs.options.active
+        : this.attrs.options.inactive;
+      this.$el.attr("title", title);
+      this.$el.attr("aria-pressed", this.value);
     },
 
     // --------------------------------------------------------------------------
@@ -2479,18 +2647,16 @@ odoo.define('web.basic_fields', function(require) {
     _onToggleButton: function(event) {
       event.stopPropagation();
       this._setValue(!this.value);
-    },
+    }
   });
 
   const JournalDashboardGraph = AbstractField.extend({
-    className: 'o_dashboard_graph',
-    cssLibs: [
-      '/web/static/lib/nvd3/nv.d3.css',
-    ],
+    className: "o_dashboard_graph",
+    cssLibs: ["/web/static/lib/nvd3/nv.d3.css"],
     jsLibs: [
-      '/web/static/lib/nvd3/d3.v3.js',
-      '/web/static/lib/nvd3/nv.d3.js',
-      '/web/static/src/js/libs/nvd3.js',
+      "/web/static/lib/nvd3/d3.v3.js",
+      "/web/static/lib/nvd3/nv.d3.js",
+      "/web/static/src/js/libs/nvd3.js"
     ],
     init: function() {
       this._super.apply(this, arguments);
@@ -2503,7 +2669,7 @@ odoo.define('web.basic_fields', function(require) {
       return this._super.apply(this, arguments);
     },
     destroy: function() {
-      if ('nv' in window && nv.utils && nv.utils.offWindowResize) {
+      if ("nv" in window && nv.utils && nv.utils.offWindowResize) {
         // if the widget is destroyed before the lazy loaded libs (nv) are
         // actually loaded (i.e. after the widget has actually started),
         // nv is undefined, but the handler isn't bound yet anyway
@@ -2539,15 +2705,15 @@ odoo.define('web.basic_fields', function(require) {
      * @private
      */
     _customizeChart: function() {
-      if (this.graph_type === 'bar') {
+      if (this.graph_type === "bar") {
         // Add classes related to time on each bar of the bar chart
         const bar_classes = _.map(this.data[0].values, function(v) {
           return v.type;
         });
 
-        _.each(this.$('.nv-bar'), function(v, k) {
+        _.each(this.$(".nv-bar"), function(v, k) {
           // classList doesn't work with phantomJS & addClass doesn't work with a SVG element
-          $(v).attr('class', $(v).attr('class') + ' ' + bar_classes[k]);
+          $(v).attr("class", $(v).attr("class") + " " + bar_classes[k]);
         });
       }
     },
@@ -2577,10 +2743,10 @@ odoo.define('web.basic_fields', function(require) {
       this.$el.empty();
       this.chart = null;
       nv.addGraph(function() {
-        self.$svg = self.$el.append('<svg>');
+        self.$svg = self.$el.append("<svg>");
         switch (self.graph_type) {
-          case 'line':
-            self.$svg.addClass('o_graph_linechart');
+          case "line":
+            self.$svg.addClass("o_graph_linechart");
 
             self.chart = nv.models.lineChart();
             self.chart.forceY([0]);
@@ -2588,12 +2754,12 @@ odoo.define('web.basic_fields', function(require) {
               x: function(d, u) {
                 return u;
               },
-              margin: {'left': 0, 'right': 0, 'top': 5, 'bottom': 0},
+              margin: { left: 0, right: 0, top: 5, bottom: 0 },
               showYAxis: false,
-              showLegend: false,
+              showLegend: false
             });
             self.chart.xAxis.tickFormat(function(d) {
-              let label = '';
+              let label = "";
               _.each(self.data, function(v) {
                 if (v.values[d] && v.values[d].x) {
                   label = v.values[d].x;
@@ -2601,48 +2767,50 @@ odoo.define('web.basic_fields', function(require) {
               });
               return label;
             });
-            self.chart.yAxis.tickFormat(d3.format(',.2f'));
+            self.chart.yAxis.tickFormat(d3.format(",.2f"));
 
             self.chart.tooltip.contentGenerator(function(key) {
-              return qweb.render('GraphCustomTooltip', {
-                'color': key.point.color,
-                'key': self.data[0].key,
-                'value': d3.format(',.2f')(key.point.y),
+              return qweb.render("GraphCustomTooltip", {
+                color: key.point.color,
+                key: self.data[0].key,
+                value: d3.format(",.2f")(key.point.y)
               });
             });
             break;
 
-          case 'bar':
-            self.$svg.addClass('o_graph_barchart');
+          case "bar":
+            self.$svg.addClass("o_graph_barchart");
 
-            self.chart = nv.models.discreteBarChart()
-                .x(function(d) {
-                  return d.label;
-                })
-                .y(function(d) {
-                  return d.value;
-                })
-                .showValues(false)
-                .showYAxis(false)
-                .color(['#875A7B', '#526774', '#FA8072'])
-                .margin({'left': 0, 'right': 0, 'top': 20, 'bottom': 20});
+            self.chart = nv.models
+              .discreteBarChart()
+              .x(function(d) {
+                return d.label;
+              })
+              .y(function(d) {
+                return d.value;
+              })
+              .showValues(false)
+              .showYAxis(false)
+              .color(["#875A7B", "#526774", "#FA8072"])
+              .margin({ left: 0, right: 0, top: 20, bottom: 20 });
 
             self.chart.xAxis.axisLabel(self.data[0].title);
-            self.chart.yAxis.tickFormat(d3.format(',.2f'));
+            self.chart.yAxis.tickFormat(d3.format(",.2f"));
 
             self.chart.tooltip.contentGenerator(function(key) {
-              return qweb.render('GraphCustomTooltip', {
-                'color': key.color,
-                'key': self.data[0].key,
-                'value': d3.format(',.2f')(key.data.value),
+              return qweb.render("GraphCustomTooltip", {
+                color: key.color,
+                key: self.data[0].key,
+                value: d3.format(",.2f")(key.data.value)
               });
             });
             break;
         }
-        d3.select(self.$('svg')[0])
-            .datum(self.data)
-            .transition().duration(600)
-            .call(self.chart);
+        d3.select(self.$("svg")[0])
+          .datum(self.data)
+          .transition()
+          .duration(600)
+          .call(self.chart);
 
         self._customizeChart();
       });
@@ -2660,32 +2828,32 @@ odoo.define('web.basic_fields', function(require) {
         this.chart.update();
         this._customizeChart();
       }
-    },
+    }
   });
 
   /**
- * The "Domain" field allows the user to construct a technical-prefix domain
- * thanks to a tree-like interface and see the selected records in real time.
- * In debug mode, an input is also there to be able to enter the prefix char
- * domain directly (or to build advanced domains the tree-like interface does
- * not allow to).
- */
+   * The "Domain" field allows the user to construct a technical-prefix domain
+   * thanks to a tree-like interface and see the selected records in real time.
+   * In debug mode, an input is also there to be able to enter the prefix char
+   * domain directly (or to build advanced domains the tree-like interface does
+   * not allow to).
+   */
   const FieldDomain = AbstractField.extend({
     /**
      * Fetches the number of records which are matched by the domain (if the
      * domain is not server-valid, the value is false) and the model the
      * field must work with.
      */
-    specialData: '_fetchSpecialDomain',
+    specialData: "_fetchSpecialDomain",
 
     events: _.extend({}, AbstractField.prototype.events, {
-      'click .o_domain_show_selection_button': '_onShowSelectionButtonClick',
-      'click .o_field_domain_dialog_button': '_onDialogEditButtonClick',
+      "click .o_domain_show_selection_button": "_onShowSelectionButtonClick",
+      "click .o_field_domain_dialog_button": "_onDialogEditButtonClick"
     }),
     custom_events: _.extend({}, AbstractField.prototype.custom_events, {
-      domain_changed: '_onDomainSelectorValueChange',
-      domain_selected: '_onDomainSelectorDialogValueChange',
-      open_record: '_onOpenRecord',
+      domain_changed: "_onDomainSelectorValueChange",
+      domain_selected: "_onDomainSelectorDialogValueChange",
+      open_record: "_onOpenRecord"
     }),
     /**
      * @constructor
@@ -2697,12 +2865,12 @@ odoo.define('web.basic_fields', function(require) {
       this.inDialog = !!this.nodeOptions.in_dialog;
       this.fsFilters = this.nodeOptions.fs_filters || {};
 
-      this.className = 'o_field_domain';
-      if (this.mode === 'edit') {
-        this.className += ' o_edit_mode';
+      this.className = "o_field_domain";
+      if (this.mode === "edit") {
+        this.className += " o_edit_mode";
       }
       if (!this.inDialog) {
-        this.className += ' o_inline_mode';
+        this.className += " o_inline_mode";
       }
 
       this._setState();
@@ -2731,9 +2899,9 @@ odoo.define('web.basic_fields', function(require) {
      */
     isValid: function() {
       return (
-        this._super.apply(this, arguments)
-            && (!this.domainSelector || this.domainSelector.isValid())
-            && this._isValidForModel
+        this._super.apply(this, arguments) &&
+        (!this.domainSelector || this.domainSelector.isValid()) &&
+        this._isValidForModel
       );
     },
 
@@ -2754,16 +2922,21 @@ odoo.define('web.basic_fields', function(require) {
       }
 
       // Convert char value to array value
-      const value = this.value || '[]';
+      const value = this.value || "[]";
 
       // Create the domain selector or change the value of the current one...
       let def;
       if (!this.domainSelector) {
-        this.domainSelector = new DomainSelector(this, this._domainModel, value, {
-          readonly: this.mode === 'readonly' || this.inDialog,
-          filters: this.fsFilters,
-          debugMode: session.debug,
-        });
+        this.domainSelector = new DomainSelector(
+          this,
+          this._domainModel,
+          value,
+          {
+            readonly: this.mode === "readonly" || this.inDialog,
+            filters: this.fsFilters,
+            debugMode: session.debug
+          }
+        );
         def = this.domainSelector.prependTo(this.$el);
       } else {
         def = this.domainSelector.setDomain(value);
@@ -2782,12 +2955,14 @@ odoo.define('web.basic_fields', function(require) {
       if (this._$content) {
         this._$content.remove();
       }
-      this._$content = $(qweb.render('FieldDomain.content', {
-        hasModel: !!this._domainModel,
-        isValid: !!this._isValidForModel,
-        nbRecords: this.record.specialData[this.name].nbRecords || 0,
-        inDialogEdit: this.inDialog && this.mode === 'edit',
-      }));
+      this._$content = $(
+        qweb.render("FieldDomain.content", {
+          hasModel: !!this._domainModel,
+          isValid: !!this._isValidForModel,
+          nbRecords: this.record.specialData[this.name].nbRecords || 0,
+          inDialogEdit: this.inDialog && this.mode === "edit"
+        })
+      );
       this._$content.appendTo(this.$el);
     },
     /**
@@ -2816,7 +2991,7 @@ odoo.define('web.basic_fields', function(require) {
     _setState: function() {
       const specialData = this.record.specialData[this.name];
       this._domainModel = specialData.model;
-      this._isValidForModel = (specialData.nbRecords !== false);
+      this._isValidForModel = specialData.nbRecords !== false;
     },
 
     // --------------------------------------------------------------------------
@@ -2832,12 +3007,12 @@ odoo.define('web.basic_fields', function(require) {
     _onShowSelectionButtonClick: function(e) {
       e.preventDefault();
       new view_dialogs.SelectCreateDialog(this, {
-        title: _t('Selected records'),
+        title: _t("Selected records"),
         res_model: this._domainModel,
-        domain: this.value || '[]',
+        domain: this.value || "[]",
         no_create: true,
         readonly: true,
-        disable_multiple_selection: true,
+        disable_multiple_selection: true
       }).open();
     },
     /**
@@ -2848,10 +3023,10 @@ odoo.define('web.basic_fields', function(require) {
      */
     _onDialogEditButtonClick: function(e) {
       e.preventDefault();
-      new DomainSelectorDialog(this, this._domainModel, this.value || '[]', {
-        readonly: this.mode === 'readonly',
+      new DomainSelectorDialog(this, this._domainModel, this.value || "[]", {
+        readonly: this.mode === "readonly",
         filters: this.fsFilters,
-        debugMode: session.debug,
+        debugMode: session.debug
       }).open();
     },
     /**
@@ -2863,7 +3038,9 @@ odoo.define('web.basic_fields', function(require) {
      */
     _onDomainSelectorValueChange: function(e) {
       if (this.inDialog) return;
-      this._setValue(Domain.prototype.arrayToString(this.domainSelector.getDomain()));
+      this._setValue(
+        Domain.prototype.arrayToString(this.domainSelector.getDomain())
+      );
     },
     /**
      * Called when the in-dialog domain selector value is confirmed
@@ -2882,21 +3059,18 @@ odoo.define('web.basic_fields', function(require) {
      */
     _onOpenRecord: function(event) {
       event.stopPropagation();
-    },
+    }
   });
 
   /**
- * This widget is intended to be used on Text fields. It will provide Ace Editor
- * for editing XML and Python.
- */
+   * This widget is intended to be used on Text fields. It will provide Ace Editor
+   * for editing XML and Python.
+   */
   const AceEditor = DebouncedField.extend({
-    template: 'AceEditor',
+    template: "AceEditor",
     jsLibs: [
-      '/web/static/lib/ace/ace.js',
-      [
-        '/web/static/lib/ace/mode-python.js',
-        '/web/static/lib/ace/mode-xml.js',
-      ],
+      "/web/static/lib/ace/ace.js",
+      ["/web/static/lib/ace/mode-python.js", "/web/static/lib/ace/mode-xml.js"]
     ],
     events: {}, // events are triggered manually for this debounced widget
     /**
@@ -2905,7 +3079,7 @@ odoo.define('web.basic_fields', function(require) {
      * @return {Deferred}
      */
     start: function() {
-      this._startAce(this.$('.ace-view-editor')[0]);
+      this._startAce(this.$(".ace-view-editor")[0]);
       return this._super.apply(this, arguments);
     },
     /**
@@ -2933,7 +3107,7 @@ odoo.define('web.basic_fields', function(require) {
      * @return {string}
      */
     _formatValue: function(value) {
-      return this._super.apply(this, arguments) || '';
+      return this._super.apply(this, arguments) || "";
     },
 
     /**
@@ -2975,33 +3149,33 @@ odoo.define('web.basic_fields', function(require) {
       this.aceEditor = ace.edit(node);
       this.aceEditor.setOptions({
         maxLines: Infinity,
-        showPrintMargin: false,
+        showPrintMargin: false
       });
-      if (this.mode === 'readonly') {
+      if (this.mode === "readonly") {
         this.aceEditor.renderer.setOptions({
           displayIndentGuides: false,
-          showGutter: false,
+          showGutter: false
         });
         this.aceEditor.setOptions({
           highlightActiveLine: false,
           highlightGutterLine: false,
-          readOnly: true,
+          readOnly: true
         });
-        this.aceEditor.renderer.$cursorLayer.element.style.display = 'none';
+        this.aceEditor.renderer.$cursorLayer.element.style.display = "none";
       }
       this.aceEditor.$blockScrolling = true;
       this.aceSession = this.aceEditor.getSession();
       this.aceSession.setOptions({
         useWorker: false,
-        mode: 'ace/mode/' + (this.nodeOptions.mode || 'xml'),
+        mode: "ace/mode/" + (this.nodeOptions.mode || "xml"),
         tabSize: 2,
-        useSoftTabs: true,
+        useSoftTabs: true
       });
-      if (this.mode === 'edit') {
-        this.aceEditor.on('change', this._doDebouncedAction.bind(this));
-        this.aceEditor.on('blur', this._doAction.bind(this));
+      if (this.mode === "edit") {
+        this.aceEditor.on("change", this._doDebouncedAction.bind(this));
+        this.aceEditor.on("blur", this._doAction.bind(this));
       }
-    },
+    }
   });
 
   return {
@@ -3044,6 +3218,6 @@ odoo.define('web.basic_fields', function(require) {
     TextCopyClipboard: TextCopyClipboard,
     CharCopyClipboard: CharCopyClipboard,
     JournalDashboardGraph: JournalDashboardGraph,
-    AceEditor: AceEditor,
+    AceEditor: AceEditor
   };
 });
